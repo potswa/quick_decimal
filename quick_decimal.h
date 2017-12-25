@@ -32,39 +32,39 @@ inline char * to_decimal_u32( uint32_t n, char * out ) {
         int digits;
         uint64_t prescale;
     } start[33] = { // Predict the number of decimal digits given (number of bits / 2).
-        { 10, prescale_base }, // Exactly 2^32-1
-        { 10, prescale_base }, // Up to 4B
-        { 10, prescale_base }, // Up to 2B
-        { 10, prescale_base }, // Up to 1B
-        { 9, prescale_base * 10 }, // Up to 512M
-        { 9, prescale_base * 10 }, // Up to 256M
-        { 9, prescale_base * 10 }, // Up to 128M
-        { 8, prescale_base * 100 }, // Up to 64M
-        { 8, prescale_base * 100 }, // Up to 32M
-        { 8, prescale_base * 100 }, // Up to 16M
-        { 7, prescale_base * 1000 }, // Up to 8M
-        { 7, prescale_base * 1000 }, // Up to 4M
-        { 7, prescale_base * 1000 }, // Up to 2M
-        { 7, prescale_base * 1000 }, // Up to 1M
-        { 6, prescale_base * 10000 }, // Up to 256k
-        { 6, prescale_base * 10000 }, // Up to 256k
-        { 6, prescale_base * 10000 }, // Up to 128k
-        { 5, prescale_base * 100000 }, // Up to 64k
-        { 5, prescale_base * 100000 }, // Up to 32k
-        { 5, prescale_base * 100000 }, // Up to 16k
-        { 4, prescale_base * 1000000 }, // Up to 8k
-        { 4, prescale_base * 1000000 }, // Up to 4k
-        { 4, prescale_base * 1000000 }, // Up to 2k
-        { 4, prescale_base * 1000000 }, // Up to 1k
-        { 3, prescale_base * 10000000 }, // Up to 510
-        { 3, prescale_base * 10000000 }, // Up to 254
-        { 3, prescale_base * 10000000 }, // Up to 126
-        { 2, prescale_base * 100000000 }, // Up to 62
-        { 2, prescale_base * 100000000 }, // Up to 30
-        { 2, prescale_base * 100000000 }, // Up to 14
-        { 1, prescale_base * 1000000000 }, // Up to 6
-        { 1, prescale_base * 1000000000 }, // Up to 2
-        { 2, 0 } // Treat zero as a two-digit number. Only the first zero is dropped.
+        { 10-1, prescale_base }, // Exactly 2^32-1
+        { 10-1, prescale_base }, // Up to 4B
+        { 10-1, prescale_base }, // Up to 2B
+        { 10-1, prescale_base }, // Up to 1B
+        { 9-1, prescale_base * 10 }, // Up to 512M
+        { 9-1, prescale_base * 10 }, // Up to 256M
+        { 9-1, prescale_base * 10 }, // Up to 128M
+        { 8-1, prescale_base * 100 }, // Up to 64M
+        { 8-1, prescale_base * 100 }, // Up to 32M
+        { 8-1, prescale_base * 100 }, // Up to 16M
+        { 7-1, prescale_base * 1000 }, // Up to 8M
+        { 7-1, prescale_base * 1000 }, // Up to 4M
+        { 7-1, prescale_base * 1000 }, // Up to 2M
+        { 7-1, prescale_base * 1000 }, // Up to 1M
+        { 6-1, prescale_base * 10000 }, // Up to 256k
+        { 6-1, prescale_base * 10000 }, // Up to 256k
+        { 6-1, prescale_base * 10000 }, // Up to 128k
+        { 5-1, prescale_base * 100000 }, // Up to 64k
+        { 5-1, prescale_base * 100000 }, // Up to 32k
+        { 5-1, prescale_base * 100000 }, // Up to 16k
+        { 4-1, prescale_base * 1000000 }, // Up to 8k
+        { 4-1, prescale_base * 1000000 }, // Up to 4k
+        { 4-1, prescale_base * 1000000 }, // Up to 2k
+        { 4-1, prescale_base * 1000000 }, // Up to 1k
+        { 3-1, prescale_base * 10000000 }, // Up to 510
+        { 3-1, prescale_base * 10000000 }, // Up to 254
+        { 3-1, prescale_base * 10000000 }, // Up to 126
+        { 2-1, prescale_base * 100000000 }, // Up to 62
+        { 2-1, prescale_base * 100000000 }, // Up to 30
+        { 2-1, prescale_base * 100000000 }, // Up to 14
+        { 1-1, prescale_base * 1000000000 }, // Up to 6
+        { 1-1, prescale_base * 1000000000 }, // Up to 2
+        { 2-1, 0 } // Treat zero as a two-digit number. Only the first zero is dropped.
     };
     
     uint64_t frac = n;
@@ -83,12 +83,13 @@ inline char * to_decimal_u32( uint32_t n, char * out ) {
         frac %= unit;
     }
     int i = start_state.digits;
-    while ( -- i ) {
+    char * ret = out + i;
+    while ( i -- ) {
         frac *= 10;
         * out ++ = '0' + frac / unit;
         frac %= unit;
     }
-    return out;
+    return ret;
 }
 
 #if __cplusplus
