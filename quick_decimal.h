@@ -25,46 +25,47 @@ using std::uint32_t;
 #endif
 
 inline char * to_decimal_u32( uint32_t n, char * out ) {
-    static CONSTDECL uint64_t unit = ((uint64_t)1) << 60;
-    static CONSTDECL uint64_t prescale_base = unit / ((uint64_t)1000000000);
+    #define unit (((uint64_t)1) << 60)
+    #define EXP10(N) ((uint64_t)1.e ## N)
+    #define SCALE(N) { N, unit / EXP10(N) - unit % (EXP10(9)/EXP10(N)) }
 
     static CONSTDECL struct initial {
         int digits;
         uint64_t prescale;
-    } start[33] = { // Predict the number of decimal digits given (number of bits / 2).
-        { 10-1, prescale_base }, // Exactly 2^32-1
-        { 10-1, prescale_base }, // Up to 4B
-        { 10-1, prescale_base }, // Up to 2B
-        { 10-1, prescale_base }, // Up to 1B
-        { 9-1, prescale_base * 10 }, // Up to 512M
-        { 9-1, prescale_base * 10 }, // Up to 256M
-        { 9-1, prescale_base * 10 }, // Up to 128M
-        { 8-1, prescale_base * 100 }, // Up to 64M
-        { 8-1, prescale_base * 100 }, // Up to 32M
-        { 8-1, prescale_base * 100 }, // Up to 16M
-        { 7-1, prescale_base * 1000 }, // Up to 8M
-        { 7-1, prescale_base * 1000 }, // Up to 4M
-        { 7-1, prescale_base * 1000 }, // Up to 2M
-        { 7-1, prescale_base * 1000 }, // Up to 1M
-        { 6-1, prescale_base * 10000 }, // Up to 256k
-        { 6-1, prescale_base * 10000 }, // Up to 256k
-        { 6-1, prescale_base * 10000 }, // Up to 128k
-        { 5-1, prescale_base * 100000 }, // Up to 64k
-        { 5-1, prescale_base * 100000 }, // Up to 32k
-        { 5-1, prescale_base * 100000 }, // Up to 16k
-        { 4-1, prescale_base * 1000000 }, // Up to 8k
-        { 4-1, prescale_base * 1000000 }, // Up to 4k
-        { 4-1, prescale_base * 1000000 }, // Up to 2k
-        { 4-1, prescale_base * 1000000 }, // Up to 1k
-        { 3-1, prescale_base * 10000000 }, // Up to 510
-        { 3-1, prescale_base * 10000000 }, // Up to 254
-        { 3-1, prescale_base * 10000000 }, // Up to 126
-        { 2-1, prescale_base * 100000000 }, // Up to 62
-        { 2-1, prescale_base * 100000000 }, // Up to 30
-        { 2-1, prescale_base * 100000000 }, // Up to 14
-        { 1-1, prescale_base * 1000000000 }, // Up to 6
-        { 1-1, prescale_base * 1000000000 }, // Up to 2
-        { 2-1, 0 } // Treat zero as a two-digit number. Only the first zero is dropped.
+    } start[33] = { // Predict the number of decimal digits given the number of bits.
+        SCALE(9), // Exactly 2^32-1
+        SCALE(9), // Up to 4B
+        SCALE(9), // Up to 2B
+        SCALE(9), // Up to 1B
+        SCALE(8), // Up to 512M
+        SCALE(8), // Up to 256M
+        SCALE(8), // Up to 128M
+        SCALE(7), // Up to 64M
+        SCALE(7), // Up to 32M
+        SCALE(7), // Up to 16M
+        SCALE(6), // Up to 8M
+        SCALE(6), // Up to 4M
+        SCALE(6), // Up to 2M
+        SCALE(6), // Up to 1M
+        SCALE(5), // Up to 256k
+        SCALE(5), // Up to 256k
+        SCALE(5), // Up to 128k
+        SCALE(4), // Up to 64k
+        SCALE(4), // Up to 32k
+        SCALE(4), // Up to 16k
+        SCALE(3), // Up to 8k
+        SCALE(3), // Up to 4k
+        SCALE(3), // Up to 2k
+        SCALE(3), // Up to 1k
+        SCALE(2), // Up to 510
+        SCALE(2), // Up to 254
+        SCALE(2), // Up to 126
+        SCALE(1), // Up to 62
+        SCALE(1), // Up to 30
+        SCALE(1), // Up to 14
+        SCALE(0), // Up to 6
+        SCALE(0), // Up to 2
+        { 1, 0 } // Print zero as one digit.
     };
     
     uint64_t frac = n;
@@ -90,6 +91,10 @@ inline char * to_decimal_u32( uint32_t n, char * out ) {
         frac %= unit;
     }
     return ret;
+    
+    #undef unit
+    #undef EXP10
+    #undef SCALE
 }
 
 #if __cplusplus
